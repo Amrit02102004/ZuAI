@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
-# Import scraping and MongoDB modules
 from final import main as scrape_main
 from model import IAModel, convert_model_to_dict
 from mongo import MongoCRUD,serialize_mongo_document
@@ -14,7 +13,6 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize MongoDB CRUD operations
 mongo_crud = MongoCRUD()
 
 @app.post("/scrape", response_model=dict)
@@ -63,12 +60,10 @@ async def get_samples(
             print(f"Retrieving samples for subject: {subject}")
             samples = await mongo_crud.get_samples_by_subject(subject, limit)
         else:
-            # If no subject specified, retrieve samples from the collection
             samples = await mongo_crud.collection.find().to_list(length=limit)
         
-        # Convert samples to IAModel directly
         return [IAModel(
-            id=str(sample['_id']),  # Explicitly convert _id to string
+            id=str(sample['_id']),  
             **{k: v for k, v in sample.items() if k != '_id'}
         ) for sample in samples]
     except Exception as e:

@@ -3,9 +3,8 @@ from typing import List, Optional, Dict, Any
 from bson import ObjectId
 import os
 from dotenv import load_dotenv
-from pymongo import UpdateOne  # Import UpdateOne explicitly
+from pymongo import UpdateOne 
 
-# Load environment variables
 load_dotenv()
 
 class MongoCRUD:

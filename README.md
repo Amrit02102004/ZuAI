@@ -129,9 +129,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name - your.email@example.com
+Your Name - amritsundarka2004@gmail.com
 
-Project Link: [https://github.com/yourusername/nailib-ib-samples](https://github.com/yourusername/nailib-ib-samples)
 ```
 
 ## Additional Recommendations
