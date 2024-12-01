@@ -109,8 +109,11 @@ class MongoCRUD:
         """
         return await self.collection.count_documents(filter_criteria or {})
 
+
 def serialize_mongo_document(document):
     """Converts MongoDB ObjectId to string in a document."""
     if isinstance(document, dict):
-        document["_id"] = str(document["_id"])
+        # Convert ObjectId to string if it exists
+        if '_id' in document and isinstance(document['_id'], ObjectId):
+            document['_id'] = str(document['_id'])
     return document

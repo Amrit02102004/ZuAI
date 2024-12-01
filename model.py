@@ -1,24 +1,7 @@
 from typing import Dict, Optional, List, Any
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from datetime import datetime
 from bson import ObjectId
-
-class PyObjectId(ObjectId):
-    """Custom type for MongoDB ObjectId to work with Pydantic"""
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v, field=None):
-        if not ObjectId.is_valid(v):
-            raise ValueError('Invalid ObjectId')
-        return ObjectId(v)
-
-    @classmethod
-    def __get_pydantic_json_schema__(cls, _core_schema: Any, handler):
-        """Modify JSON schema for Pydantic v2"""
-        return {'type': 'string'}
 
 class IAModel(BaseModel):
     """Pydantic model for IB Internal Assessment (IA) or Extended Essay (EE)"""
@@ -36,7 +19,7 @@ class IAModel(BaseModel):
         arbitrary_types_allowed=True
     )
 
-    id: PyObjectId = Field(default_factory=PyObjectId, alias='_id')
+    id: Optional[str] = Field(default=None, alias='_id')
     title: str = Field(..., description="Title of the IA/EE")
     subject: str = Field(..., description="IB Subject (e.g., Math AI SL)")
     description: Optional[str] = Field(None, description="Brief description or overview")
@@ -46,6 +29,12 @@ class IAModel(BaseModel):
     file_link: Optional[str] = Field(None, description="Link to downloadable resource")
     publication_date: datetime = Field(default_factory=datetime.now, description="Date of publication/scraping")
     source_url: Optional[str] = Field(None, description="Original source URL")
+
+    @field_serializer('id')
+    def serialize_id(self, id: Any, _info):
+        if isinstance(id, ObjectId):
+            return str(id)
+        return id
 
 def convert_model_to_dict(model: IAModel) -> dict:
     """Convert Pydantic model to dictionary for MongoDB insertion"""

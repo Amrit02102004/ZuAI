@@ -6,7 +6,7 @@ from typing import List, Optional
 # Import scraping and MongoDB modules
 from final import main as scrape_main
 from model import IAModel, convert_model_to_dict
-from mongo import MongoCRUD
+from mongo import MongoCRUD,serialize_mongo_document
 
 app = FastAPI(
     title="Nailib IB Samples API",
@@ -60,15 +60,19 @@ async def get_samples(
     """
     try:
         if subject:
-            samples = await mongo_crud.get_samples_by_subject(subject, limit,25)
+            print(f"Retrieving samples for subject: {subject}")
+            samples = await mongo_crud.get_samples_by_subject(subject, limit)
         else:
             # If no subject specified, retrieve samples from the collection
             samples = await mongo_crud.collection.find().to_list(length=limit)
         
-        return [IAModel(**sample) for sample in samples]
+        # Convert samples to IAModel directly
+        return [IAModel(
+            id=str(sample['_id']),  # Explicitly convert _id to string
+            **{k: v for k, v in sample.items() if k != '_id'}
+        ) for sample in samples]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/samples/count", response_model=dict)
 async def count_samples(subject: Optional[str] = None):
     """
