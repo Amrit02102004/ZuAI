@@ -1,10 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
-import json
 import traceback
 import sys
 from urllib.parse import urlparse, unquote
 from working import scrape_nailib_page
+from motor.motor_asyncio import AsyncIOMotorClient
+from model import IAModel, convert_model_to_dict
+
+# Import MongoDB CRUD class
+from mongo import MongoCRUD
+
 def extract_math_ia_links(base_url):
     """
     Extract Math IA links from the webpage.
@@ -61,25 +66,44 @@ def extract_math_ia_links(base_url):
         traceback.print_exc()
         return []
 
-def scrape_multiple_math_ias(urls):
+async def scrape_multiple_math_ias(urls, mongo_crud):
     """
-    Scrape multiple Math IA URLs and collect their data.
+    Scrape multiple Math IA URLs and store directly in MongoDB.
+    
+    :param urls: List of URLs to scrape
+    :param mongo_crud: MongoDB CRUD instance for storing samples
     """
-    all_ia_data = []
+    successful_samples = 0
     
     for url in urls:
         print(f"Scraping URL: {url}")
         try:
+            # Scrape individual page
             ia_data = scrape_nailib_page(url)
             
             if ia_data:
-                all_ia_data.append(ia_data)
+                # Convert to Pydantic model
+                sample_model = IAModel(**{
+                    **ia_data, 
+                    'source_url': url  # Add source URL to the sample
+                })
+                
+                # Convert to dictionary and store in MongoDB
+                sample_dict = convert_model_to_dict(sample_model)
+                await mongo_crud.create_sample(sample_dict)
+                
+                successful_samples += 1
+                print(f"Successfully stored sample from {url}")
         except Exception as e:
             print(f"Error scraping {url}: {e}")
+            traceback.print_exc()
     
-    return all_ia_data
+    return successful_samples
 
-def main():
+async def main():
+    """
+    Modified main function to be fully async
+    """
     # List of base URLs to search for Math IA samples
     base_urls = [
         'https://nailib.com/ia-sample/ib-math-ai-sl',
@@ -97,18 +121,15 @@ def main():
     
     print(f"Found {len(all_math_ia_links)} Math IA links")
     if all_math_ia_links:
-        print("Links:", all_math_ia_links)
+        # Initialize MongoDB CRUD
+        mongo_crud = MongoCRUD()
         
-        # Scrape all found links
-        scraped_data = scrape_multiple_math_ias(all_math_ia_links)
+        # Scrape and store samples
+        successful_samples = await scrape_multiple_math_ias(all_math_ia_links, mongo_crud)
         
-        # Save all scraped data to a single JSON file
-        with open('all_math_ia_data.json', 'w', encoding='utf-8') as f:
-            json.dump(scraped_data, f, ensure_ascii=False, indent=2)
-        
-        print(f"Scraped and saved data for {len(scraped_data)} Math IAs")
+        print(f"Successfully scraped and stored {successful_samples} Math IAs into MongoDB")
     else:
         print("No valid Math IA links found.")
-
-if __name__ == "__main__":
-    main()
+    
+    # Return the number of successful samples
+    return {"successful_samples": successful_samples}

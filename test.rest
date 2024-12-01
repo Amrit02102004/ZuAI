@@ -1,0 +1,50 @@
+### Base URL
+@baseUrl = http://localhost:8000
+
+### 1. Trigger Scraping
+POST {{baseUrl}}/scrape
+Content-Type: application/json
+
+### 2. Get All Samples (Default Limit)
+GET {{baseUrl}}/samples
+
+### 3. Get Samples by Subject (Math AI SL)
+GET {{baseUrl}}/samples?subject=Math AI SL&limit=5
+
+### 4. Count Total Samples
+GET {{baseUrl}}/samples/count
+
+### 5. Count Samples by Subject
+GET {{baseUrl}}/samples/count?subject=Math AI SL
+
+### 6. Get Sample by Specific ID (replace with an actual ID from your database)
+GET {{baseUrl}}/samples/660a1b2c3d4e5f6789abcdef
+
+### 7. Create a Sample Manually (if your API supports direct creation)
+POST {{baseUrl}}/samples
+Content-Type: application/json
+
+{
+    "title": "Advanced Mathematics Internal Assessment",
+    "subject": "Math AI HL",
+    "description": "Exploring mathematical modeling techniques",
+    "word_count": 2800,
+    "sections": {
+        "introduction": "Mathematical modeling of real-world phenomena",
+        "methodology": "Utilizing advanced calculus and statistical analysis"
+    },
+    "read_time": "15 mins",
+    "source_url": "https://example.com/math-ia-sample"
+}
+
+### 8. Update a Sample (replace with an actual ID)
+PUT {{baseUrl}}/samples/660a1b2c3d4e5f6789abcdef
+Content-Type: application/json
+
+{
+    "description": "Updated description of the mathematical investigation",
+    "word_count": 3000
+}
+
+### 9. Delete a Sample (replace with an actual ID)
+DELETE {{baseUrl}}/samples/660a1b2c3d4e5f6789abcdef
