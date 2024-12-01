@@ -83,7 +83,7 @@ def main():
     # List of base URLs to search for Math IA samples
     base_urls = [
         'https://nailib.com/ia-sample/ib-math-ai-sl',
-        'https://nailib.com/ia-sample/ib-math-aa-hl'
+        'https://nailib.com/ee-sample/ib-math-ai-sl'
     ]
     
     # Collect all Math IA links

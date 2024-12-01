@@ -7,7 +7,7 @@ from datetime import datetime
 def extract_details(soup):
     ia_data = {
         "title": "",
-        "subject": "Math AA HL",
+        "subject": "Math AI SL",
         "description": "",
         "sections": {},
         "word_count": 0,
@@ -50,11 +50,6 @@ def extract_details(soup):
     else:
         print("Word count div NOT found!")
     
-    # Optional: If word count still not found, print out all divs to inspect
-    if ia_data["word_count"] == 0:
-        print("All divs:")
-        for div in soup.find_all('div'):
-            print(div.get_text(strip=True))
     
     # Extract PDF file link
     pdf_link = soup.find('a', href=lambda href: href and href.endswith('.pdf'))
@@ -130,6 +125,5 @@ def scrape_nailib_page(url):
         print(f"An unexpected error occurred: {e}")
         return None
 
-# Example usage (replace with the actual URL when available)
 # url = 'https://nailib.com/ia-sample/ib-math-aa-hl/649a7fa93367e8a2e6bfda28'
 # scrape_nailib_page(url)``
